@@ -1,5 +1,5 @@
 import express from 'express';
-import { connection } from '../server';
+import { connection } from '../middlewares/connectDbMiddleware';
 import bcrypt from 'bcrypt';
 import { User } from '../models/UserModel';
 import jwt from 'jsonwebtoken';
