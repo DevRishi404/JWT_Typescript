@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 
 const app = express();
 
-app.get('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
     try {
         const db = connection.db('sample_mflix');
         const collection = db.collection('users');
@@ -33,12 +33,12 @@ app.get('/login', async (req, res) => {
             return;
         }
 
-        // Generate JWT token
         if (!process.env.JWT_SECRET_KEY) {
             res.status(500).json({ message: 'JWT secret key not configured' });
             return;
         }
-
+        
+        // Generate JWT token
         const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
 
         res.status(200).json({ message: 'Login successful', token });
@@ -49,7 +49,7 @@ app.get('/login', async (req, res) => {
     }
 });
 
-app.get("/register", async (req, res) => {
+app.post("/register", async (req, res) => {
     try {
         const db = connection.db('sample_mflix');
         const collection = db.collection('users');

@@ -1,13 +1,14 @@
 import { TextField, Button } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const defaultValues = {
-    username: '',
+    email: '',
     password: ''
 }
 
 interface LoginForm {
-    username: string;
+    email: string;
     password: string;
 }
 
@@ -19,8 +20,34 @@ const Login = () => {
     } = useForm<LoginForm>({ defaultValues });
 
     const handleFormSubmit = (data: LoginForm) => {
-        console.log(data);
+        loginMutation.mutate(data);
     }
+
+    const queryClient = useQueryClient();
+
+    const loginMutation = useMutation({
+        mutationFn: async (data: LoginForm) => {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+                const res= await response.json();
+                alert(res.message || 'Login failed');
+            }
+            return response.json();
+        },
+        onSuccess: (data) => {
+            console.log('Login successful:', data);
+            queryClient.setQueryData(['user'], data);
+        },
+        onError: (error) => {
+            console.error('Login error:', error);
+        }
+    })
 
     return (
         <>
@@ -28,13 +55,13 @@ const Login = () => {
                 <h1>Login</h1>
                 <form onSubmit={handleSubmit(handleFormSubmit)}>
                     <div className="form-group">
-                        <div className="username">
+                        <div className="email">
                             <Controller
-                                name="username"
+                                name="email"
                                 control={control}
                                 render={({ field }) => (
                                     <TextField.Root
-                                        placeholder="Username"
+                                        placeholder="Email"
                                         size="1"
                                         {...field}
                                     />
@@ -50,6 +77,7 @@ const Login = () => {
                                         placeholder="Password"
                                         size="1"
                                         {...field}
+                                        type="password"
                                     />
                                 }
                             />

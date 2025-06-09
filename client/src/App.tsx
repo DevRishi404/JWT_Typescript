@@ -1,4 +1,3 @@
-import './App.css'
 import Login from './Auth/Login.tsx'
 
 function App() {
