@@ -1,6 +1,6 @@
 import { TextField, Button } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./AuthContext";
 
 const defaultValues = {
     email: '',
@@ -19,35 +19,11 @@ const Login = () => {
         handleSubmit
     } = useForm<LoginForm>({ defaultValues });
 
-    const handleFormSubmit = (data: LoginForm) => {
-        loginMutation.mutate(data);
+    const { login } = useAuth();
+
+    const handleFormSubmit = ({email, password}: LoginForm) => {
+        login(email, password);
     }
-
-    const queryClient = useQueryClient();
-
-    const loginMutation = useMutation({
-        mutationFn: async (data: LoginForm) => {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            if (!response.ok) {
-                const res= await response.json();
-                alert(res.message || 'Login failed');
-            }
-            return response.json();
-        },
-        onSuccess: (data) => {
-            console.log('Login successful:', data);
-            queryClient.setQueryData(['user'], data);
-        },
-        onError: (error) => {
-            console.error('Login error:', error);
-        }
-    })
 
     return (
         <>

@@ -14,7 +14,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const loginFn = async (email: string, password: string): Promise<void> => {
+const loginFn = async ({ email, password }: User): Promise<User> => {
     try {
         const response = await fetch('/api/auth/login', {
             method: 'POST',
@@ -31,7 +31,8 @@ const loginFn = async (email: string, password: string): Promise<void> => {
 
         const data = await response.json();
         console.log('Login successful:', data);
-    } catch(e) {
+        return data as User;
+    } catch (e) {
         throw new Error(`Login error: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
 }
@@ -43,24 +44,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const queryClient = useQueryClient();
 
-    const {mutate, isPending, error, data} = useMutation({
-        mutationFn:({email, password}) => loginFn(email, password),
-        onSuccess: (data) => {
-
+    const { mutateAsync } = useMutation({
+        mutationFn: loginFn,
+        onSuccess: (user: User) => {
+            setUser(user);
+            console.log("Login successful", user);
+        },
+        onError: (error) => {
+            console.error("Login failed", error);
         }
     })
 
     const login = async (email: string, password: string) => {
-        console.log(`${email} ${password}`);
-    }
+        setLoading(true);
+        try {
+            const user = await mutateAsync({ email, password });
+            setUser(user);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const logout = () => { 
+    const logout = () => {
         console.log("Logging out");
+        setUser(undefined);
+        queryClient.clear();
     }
 
     return (
         <AuthContext.Provider value={{ user, login, logout, loading, setUser, setLoading }}>
-            { children }
+            {children}
         </AuthContext.Provider>
     )
 }
