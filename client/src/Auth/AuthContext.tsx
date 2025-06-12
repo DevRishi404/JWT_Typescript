@@ -9,6 +9,7 @@ interface AuthContextType {
     loading: boolean;
     setUser: (user: User | undefined) => void;
     setLoading: (loading: boolean) => void;
+    register: (email: string, password: string) => Promise<{message: string}>;
 }
 
 
@@ -37,6 +38,29 @@ const loginFn = async ({ email, password }: User): Promise<User> => {
     }
 }
 
+const registerFn = async ({ email, password }: User): Promise<{message: string}> => {
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        if(!response.ok) {
+            const res = await response.json();
+            throw new Error(res.message || 'Registration failed');
+        }
+
+        const data = await response.json();
+        console.log('Registration successful:', data);
+        return data;
+    } catch(e) {
+        throw new Error(`Registration error: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     const [user, setUser] = useState<User | undefined>(undefined);
@@ -52,6 +76,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
         onError: (error) => {
             console.error("Login failed", error);
+        }
+    });
+
+    const { mutateAsync: mutateRegister } = useMutation({
+        mutationFn: registerFn,
+        onSuccess: (data) => {
+            console.log("Registration successful", data);
+            return data;
+        },
+        onError: (error) => {
+            console.error("Registration failed", error);
         }
     })
 
@@ -73,8 +108,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         queryClient.clear();
     }
 
+    const register = async (email: string, password: string): Promise<{message: string}> => {
+        setLoading(true);
+        try {
+            const data = await mutateRegister({ email, password });
+            if(!data) {
+                return { message: "Registration failed" }
+            }  
+
+            return data;
+        } catch(e) {
+            console.error("Registration failed", e);
+            return { message: "Registration failed" };
+        }
+    }   
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading, setUser, setLoading }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, setUser, setLoading, register }}>
             {children}
         </AuthContext.Provider>
     )

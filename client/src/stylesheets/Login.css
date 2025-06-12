@@ -1,0 +1,34 @@
+
+.login-outer-container {
+    position: relative;
+    display: flex;
+    border: 1px solid gray;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container {
+    width: 50%;
+    height: 20rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-top: 1.3rem;
+    border: 1px solid gray;
+    padding: 3rem;
+}
+
+.email, .password {
+    margin-bottom: 1.2rem;
+}
+
+.button {
+    display: flex;
+    justify-content: center;
+}

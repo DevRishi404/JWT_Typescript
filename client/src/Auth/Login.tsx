@@ -1,8 +1,10 @@
-import { TextField, Button } from "@radix-ui/themes";
+import { TextField, Button, Heading } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import { useAuth } from "./AuthContext";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
+import '../stylesheets/Login.css';
+import { IconUserFilled } from '@tabler/icons-react'
 
 const defaultValues = {
     email: '',
@@ -25,55 +27,67 @@ const Login = () => {
 
     const { login, user } = useAuth();
 
-    useEffect(() => {   
-        if(user) {
+    useEffect(() => {
+        if (user) {
             setLocation('/dashboard');
         }
     }, [user, setLocation]);
 
-    const handleFormSubmit = ({email, password}: LoginForm) => {
+    const handleFormSubmit = ({ email, password }: LoginForm) => {
         login(email, password);
     }
 
     return (
         <>
-            <div className="login-container">
-                <h1>Login</h1>
-                <form onSubmit={handleSubmit(handleFormSubmit)}>
-                    <div className="form-group">
-                        <div className="email">
-                            <Controller
-                                name="email"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField.Root
-                                        placeholder="Email"
-                                        size="1"
-                                        {...field}
-                                    />
-                                )}
-                            />
-                        </div>
-                        <div className="password">
-                            <Controller
-                                name="password"
-                                control={control}
-                                render={({ field }) =>
-                                    <TextField.Root
-                                        placeholder="Password"
-                                        size="1"
-                                        {...field}
-                                        type="password"
-                                    />
-                                }
-                            />
+            <div className="login-outer-container">
+                <div className="login-container">
+                    <Heading size="8">Login</Heading>
+                    <form onSubmit={handleSubmit(handleFormSubmit)}>
+                        <div className="form-group">
+                            <div className="email">
+                                <Controller
+                                    name="email"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField.Root
+                                            placeholder="Email"
+                                            size="3"
+                                            {...field}
+                                        >
+                                            <TextField.Slot
+                                                side="left"
+                                            >
+                                                <IconUserFilled />
+                                            </TextField.Slot>
+                                        </TextField.Root>
+                                    )}
+                                />
+                            </div>
+                            <div className="password">
+                                <Controller
+                                    name="password"
+                                    control={control}
+                                    render={({ field }) =>
+                                        <TextField.Root
+                                            placeholder="Password"
+                                            size="3"
+                                            {...field}
+                                            type="password"
+                                        >
 
+                                        </TextField.Root>
+                                    }
+                                />
+
+                            </div>
+                            <div className="button">
+                                <Button variant="outline" color="bronze" type="submit" size="3">
+                                    Login
+                                </Button>
+                            </div>
                         </div>
-                        <div>
-                            <Button type="submit" size="3">Login</Button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </>
     )

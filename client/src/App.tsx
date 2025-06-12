@@ -1,5 +1,5 @@
 import Login from './Auth/Login.tsx'
-import "./app.css"
+import "./stylesheets/app.css"
 import Register from './Auth/Register.tsx'
 import { Switch, Route } from 'wouter'
 import Dashboard from './components/Dashboard.tsx';

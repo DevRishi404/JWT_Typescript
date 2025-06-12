@@ -11,12 +11,14 @@
   },
   "dependencies": {
     "@radix-ui/themes": "^3.2.1",
+    "@tabler/icons-react": "^3.34.0",
     "@tanstack/react-query": "^5.80.6",
     "dotenv": "^16.5.0",
     "path": "^0.12.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.57.0",
+    "react-toastify": "^11.0.5",
     "wouter": "^3.7.1"
   },
   "devDependencies": {

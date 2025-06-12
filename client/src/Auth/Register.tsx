@@ -1,5 +1,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { TextField, Button } from "@radix-ui/themes";
+import { useAuth } from "./AuthContext";
+import { ToastContainer, toast } from "react-toastify";
 
 interface RegisterForm {
     email: string;
@@ -8,9 +10,12 @@ interface RegisterForm {
 
 const Register = () => {
 
+    const {register} = useAuth();
+
     const {
         control,
-        handleSubmit
+        handleSubmit,
+        reset
     } = useForm<RegisterForm>({
         defaultValues: {
             email: '',
@@ -18,8 +23,18 @@ const Register = () => {
         }
     });
 
-    const onSubmit = (data: RegisterForm) => {
-        console.log(data)
+    const onSubmit = async ({email, password}: RegisterForm) => {
+        try {
+            const result = await register(email, password);
+            toast.success(result.message);
+            reset();
+        } catch(e) {
+            if (e instanceof Error) {
+                toast.error(e.message || "Registration failed");
+            } else {
+                console.log(e);
+            }
+        }
     }
 
     return (
@@ -59,6 +74,7 @@ const Register = () => {
                         </div>
                     </div>
                     <Button type="submit">Register</Button>
+                    <ToastContainer />
                 </form>
             </div>
         </>
