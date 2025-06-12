@@ -1,6 +1,8 @@
 import { TextField, Button } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import { useAuth } from "./AuthContext";
+import { useLocation } from "wouter";
+import { useEffect } from "react";
 
 const defaultValues = {
     email: '',
@@ -14,12 +16,20 @@ interface LoginForm {
 
 const Login = () => {
 
+    const [, setLocation] = useLocation();
+
     const {
         control,
         handleSubmit
     } = useForm<LoginForm>({ defaultValues });
 
-    const { login } = useAuth();
+    const { login, user } = useAuth();
+
+    useEffect(() => {   
+        if(user) {
+            setLocation('/dashboard');
+        }
+    }, [user, setLocation]);
 
     const handleFormSubmit = ({email, password}: LoginForm) => {
         login(email, password);
