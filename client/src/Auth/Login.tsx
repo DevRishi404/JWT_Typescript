@@ -2,9 +2,9 @@ import { TextField, Button, Heading } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import { useAuth } from "./AuthContext";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import '../stylesheets/Login.css';
-import { IconUserFilled } from '@tabler/icons-react'
+import { IconUserFilled, IconKey, IconEye, IconEyeOff } from '@tabler/icons-react'
 
 const defaultValues = {
     email: '',
@@ -19,6 +19,7 @@ interface LoginForm {
 const Login = () => {
 
     const [, setLocation] = useLocation();
+    const [showPassword, setShowPassword] = useState(false);
 
     const {
         control,
@@ -35,6 +36,10 @@ const Login = () => {
 
     const handleFormSubmit = ({ email, password }: LoginForm) => {
         login(email, password);
+    }
+
+    const handlePasswordVisibility = () => {
+        setShowPassword(prev => !prev)
     }
 
     return (
@@ -72,16 +77,24 @@ const Login = () => {
                                             placeholder="Password"
                                             size="3"
                                             {...field}
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
+                                            className="wide-textfield"
                                         >
-
+                                            <TextField.Slot
+                                                side="left"
+                                            >
+                                                <IconKey />
+                                            </TextField.Slot>
+                                            <TextField.Slot side="right" onClick={handlePasswordVisibility} style={{cursor: "pointer"}}>
+                                                {showPassword ? <IconEyeOff /> : <IconEye />}
+                                            </TextField.Slot>
                                         </TextField.Root>
                                     }
                                 />
 
                             </div>
                             <div className="button">
-                                <Button variant="outline" color="bronze" type="submit" size="3">
+                                <Button variant="outline" color="bronze" type="submit" size="3" style={{ cursor: "pointer" }}>
                                     Login
                                 </Button>
                             </div>
