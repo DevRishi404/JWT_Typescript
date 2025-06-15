@@ -1,8 +1,8 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
+import { connectDbMiddleWare } from './middlewares/connectDbMiddleware';
+import cookieParser from "cookie-parser";
 import dotenv from 'dotenv';
 dotenv.config();
-import { MongoClient } from 'mongodb';
-import { connectDbMiddleWare } from './middlewares/connectDbMiddleware';
 
 import authRoute from './routes/authRoutes';
 
@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 8001;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(connectDbMiddleWare());
+app.use(cookieParser());
 
 app.use('/api/auth', authRoute);
 

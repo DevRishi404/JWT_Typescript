@@ -8,7 +8,7 @@ import "@radix-ui/themes/styles.css";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Theme appearance='dark' accentColor='jade'>
+    <Theme appearance='dark' accentColor='indigo'>
       <QueryClientProvider client={new QueryClient()}>
         <AuthProvider>
           <App />

@@ -2,20 +2,14 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
     TextField, Button, Flex, Box, Heading, Container,
-    Theme, Select
+    Theme, Select, Text
 } from "@radix-ui/themes";
 import { useAuth } from "./AuthContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IconEye, IconEyeOff } from '@tabler/icons-react'
-
-interface RegisterForm {
-    name: string;
-    email: string;
-    password: string;
-    gender: string;
-    confirmPassword: string;
-}
+import { type RegisterReqBody } from "../models/RegisterTypes";
+import { Link } from "wouter";
 
 const Register = () => {
 
@@ -28,8 +22,8 @@ const Register = () => {
         handleSubmit,
         reset,
         watch,
-        formState: {errors}
-    } = useForm<RegisterForm>({
+        formState: { errors }
+    } = useForm<RegisterReqBody>({
         defaultValues: {
             name: "",
             email: "",
@@ -39,12 +33,19 @@ const Register = () => {
         },
     });
 
-    const onSubmit = async (model: RegisterForm) => {
+    const onSubmit = async (model: RegisterReqBody) => {
         try {
-            //   const result = await register(email, password);
-            //   toast.success(result.message);
-            //   reset();
-            console.log(model)
+            const data: RegisterReqBody = {
+                name: model.name,
+                email: model.email,
+                password: model.password,
+                confirmPassword: model.confirmPassword,
+                gender: model.gender
+            }
+              const result = await register(data);
+              toast.success(result.message);
+              reset();
+            // console.log(model)
         } catch (e) {
             if (e instanceof Error) {
                 toast.error(e.message || "Registration failed");
@@ -104,7 +105,7 @@ const Register = () => {
                                         type={showPassword ? "text" : "password"}
                                         required
                                     >
-                                        <TextField.Slot side="right" onClick={() => setShowPassword(prev => !prev)} style={{cursor: "pointer"}}>
+                                        <TextField.Slot side="right" onClick={() => setShowPassword(prev => !prev)} style={{ cursor: "pointer" }}>
                                             {showPassword ? <IconEyeOff /> : <IconEye />}
                                         </TextField.Slot>
                                     </TextField.Root>
@@ -128,7 +129,11 @@ const Register = () => {
                                     }
                                 }}
                             />
-                            <span style={{color: 'red'}}>{errors && errors.confirmPassword && errors.confirmPassword.message}</span>
+                            {errors && errors.confirmPassword && (
+                                <span style={{ color: 'red' }}>
+                                    {errors.confirmPassword.message}
+                                </span>)
+                            }
 
                             <Controller
                                 name="gender"
@@ -150,12 +155,18 @@ const Register = () => {
                                 )}
                             />
 
-                            <Button type="submit" variant="solid" size="3" mt="2" style={{cursor: "pointer"}}>
+                            <Button type="submit" variant="solid" size="3" mt="2" style={{ cursor: "pointer" }}>
                                 Register
                             </Button>
                         </Flex>
                     </form>
                 </Box>
+
+                <Flex justify="center">
+                    <Text as="div" size="3">
+                        Already Registered? <Link href="/login">Login</Link>
+                    </Text>
+                </Flex>
 
                 <ToastContainer position="top-right" />
             </Container>

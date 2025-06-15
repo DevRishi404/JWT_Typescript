@@ -1,10 +1,11 @@
-import { TextField, Button, Heading } from "@radix-ui/themes";
+import { TextField, Button, Heading, Flex, Text } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import { useAuth } from "./AuthContext";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import '../stylesheets/Login.css';
 import { IconUserFilled, IconKey, IconEye, IconEyeOff } from '@tabler/icons-react'
+import { Link } from "wouter";
 
 const defaultValues = {
     email: '',
@@ -85,7 +86,7 @@ const Login = () => {
                                             >
                                                 <IconKey />
                                             </TextField.Slot>
-                                            <TextField.Slot side="right" onClick={handlePasswordVisibility} style={{cursor: "pointer"}}>
+                                            <TextField.Slot side="right" onClick={handlePasswordVisibility} style={{ cursor: "pointer" }}>
                                                 {showPassword ? <IconEyeOff /> : <IconEye />}
                                             </TextField.Slot>
                                         </TextField.Root>
@@ -100,6 +101,11 @@ const Login = () => {
                             </div>
                         </div>
                     </form>
+                    <Flex justify="center" style={{marginTop: "1rem"}}>
+                        <Text as="div">
+                            New Here? <Link href="/register">Register</Link>
+                        </Text>
+                    </Flex>
                 </div>
             </div>
         </>

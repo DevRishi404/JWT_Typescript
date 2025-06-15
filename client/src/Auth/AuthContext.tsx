@@ -1,6 +1,7 @@
-import { createContext, useContext, useState } from "react";
-import { type User } from '../models/User';
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type RegisterReqBody } from "../models/RegisterTypes";
+import { type LoginResBody, type LoginReqBody, type User } from "../models/LoginTypes";
 
 interface AuthContextType {
     user: User | undefined;
@@ -9,13 +10,13 @@ interface AuthContextType {
     loading: boolean;
     setUser: (user: User | undefined) => void;
     setLoading: (loading: boolean) => void;
-    register: (email: string, password: string) => Promise<{message: string}>;
+    register: (registerData: RegisterReqBody) => Promise<{ message: string }>;
 }
 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const loginFn = async ({ email, password }: User): Promise<User> => {
+const loginFn = async ({ email, password }: LoginReqBody): Promise<LoginResBody> => {
     try {
         const response = await fetch('/api/auth/login', {
             method: 'POST',
@@ -32,23 +33,23 @@ const loginFn = async ({ email, password }: User): Promise<User> => {
 
         const data = await response.json();
         console.log('Login successful:', data);
-        return data as User;
+        return data;
     } catch (e) {
         throw new Error(`Login error: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
 }
 
-const registerFn = async ({ email, password }: User): Promise<{message: string}> => {
+const registerFn = async (registerData: RegisterReqBody): Promise<{ message: string }> => {
     try {
         const response = await fetch('/api/auth/register', {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify(registerData)
         });
 
-        if(!response.ok) {
+        if (!response.ok) {
             const res = await response.json();
             throw new Error(res.message || 'Registration failed');
         }
@@ -56,7 +57,7 @@ const registerFn = async ({ email, password }: User): Promise<{message: string}>
         const data = await response.json();
         console.log('Registration successful:', data);
         return data;
-    } catch(e) {
+    } catch (e) {
         throw new Error(`Registration error: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
 }
@@ -68,11 +69,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const queryClient = useQueryClient();
 
+    useEffect(() => {
+        try {
+            const validateUser = async () => {
+                const res = await fetch("/api/auth/me", {credentials: "include"});
+
+                if(!res.ok) {
+                    throw new Error("Error validating token");
+                    setUser(undefined);
+                }
+
+                const data = await res.json();
+                setUser(data);
+            }
+
+            validateUser();
+        } catch(e) {    
+            setUser(undefined);
+            throw new Error("Error while validating user");
+        }
+    }, [])    
+
     const { mutateAsync } = useMutation({
         mutationFn: loginFn,
-        onSuccess: (user: User) => {
-            setUser(user);
+        onSuccess: (user: LoginResBody) => {
             console.log("Login successful", user);
+            return user;
         },
         onError: (error) => {
             console.error("Login failed", error);
@@ -93,7 +115,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const login = async (email: string, password: string) => {
         setLoading(true);
         try {
-            const user = await mutateAsync({ email, password });
+            const res: LoginResBody = await mutateAsync({ email, password });
+
+            const user: User = {
+                name: res.user.name,
+                email: res.user.name,
+                gender: res.user.gender
+            }
+
             setUser(user);
         } catch (err) {
             console.error(err);
@@ -108,20 +137,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         queryClient.clear();
     }
 
-    const register = async (email: string, password: string): Promise<{message: string}> => {
+    const register = async (registerData: RegisterReqBody): Promise<{ message: string }> => {
         setLoading(true);
         try {
-            const data = await mutateRegister({ email, password });
-            if(!data) {
+            const data = await mutateRegister(registerData);
+            if (!data) {
                 return { message: "Registration failed" }
-            }  
+            }
 
             return data;
-        } catch(e) {
+        } catch (e) {
             console.error("Registration failed", e);
             return { message: "Registration failed" };
         }
-    }   
+    }
 
     return (
         <AuthContext.Provider value={{ user, login, logout, loading, setUser, setLoading, register }}>
