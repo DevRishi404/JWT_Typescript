@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type RegisterReqBody } from "../models/RegisterTypes";
 import { type LoginResBody, type LoginReqBody, type User } from "../models/LoginTypes";
 
@@ -72,23 +72,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         try {
             const validateUser = async () => {
-                const res = await fetch("/api/auth/me", {credentials: "include"});
+                setLoading(true);
+                let res = await fetch("/api/auth/me", { credentials: "include" });
 
-                if(!res.ok) {
-                    throw new Error("Error validating token");
-                    setUser(undefined);
+                if (res.status === 401) {
+                    const refreshRes = await fetch("/api/auth/refresh", { 
+                        method: "POST",
+                        credentials: "include" 
+                    });
+
+                    if (refreshRes.status !== 200) {
+                        logout();
+                        setLoading(false);
+                        return;
+                    }
+                    
+                    res = await fetch("/api/auth/me", { credentials: "include" });
+                    if (res.status !== 200) {
+                        logout();
+                        setLoading(false);
+                        return;
+                    }
                 }
 
                 const data = await res.json();
-                setUser(data);
+                setUser(data.user);
+                setLoading(false);
             }
 
             validateUser();
-        } catch(e) {    
+        } catch (e) {
             setUser(undefined);
             throw new Error("Error while validating user");
         }
-    }, [])    
+    }, [])
 
     const { mutateAsync } = useMutation({
         mutationFn: loginFn,
@@ -131,10 +148,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const logout = () => {
-        console.log("Logging out");
-        setUser(undefined);
-        queryClient.clear();
+    const logout = async () => {
+        setLoading(true);
+        try{
+            await fetch("/api/auth/logout", {
+                method: "POST",
+                credentials: "include"
+            });
+            console.log("Logging out");
+            setUser(undefined);
+            queryClient.clear();
+
+        } catch(e) {
+            console.log(e)
+        } finally {
+            setLoading(false);
+        }
     }
 
     const register = async (registerData: RegisterReqBody): Promise<{ message: string }> => {

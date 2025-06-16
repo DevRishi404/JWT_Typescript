@@ -27,7 +27,7 @@ const Login = () => {
         handleSubmit
     } = useForm<LoginForm>({ defaultValues });
 
-    const { login, user } = useAuth();
+    const { login, user, loading } = useAuth();
 
     useEffect(() => {
         if (user) {
@@ -95,13 +95,22 @@ const Login = () => {
 
                             </div>
                             <div className="button">
-                                <Button variant="outline" color="bronze" type="submit" size="3" style={{ cursor: "pointer" }}>
-                                    Login
-                                </Button>
+                                {
+                                    loading ? (
+                                        <Button variant="outline" color="bronze" type="submit" size="3" style={{ cursor: "pointer" }} disabled>
+                                            Please wait!
+                                        </Button>
+                                    ) : (
+                                        <Button variant="outline" color="bronze" type="submit" size="3" style={{ cursor: "pointer" }}>
+                                            Login
+                                        </Button>
+
+                                    )
+                                }
                             </div>
                         </div>
                     </form>
-                    <Flex justify="center" style={{marginTop: "1rem"}}>
+                    <Flex justify="center" style={{ marginTop: "1rem" }}>
                         <Text as="div">
                             New Here? <Link href="/register">Register</Link>
                         </Text>
